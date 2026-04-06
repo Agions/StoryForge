@@ -1,6 +1,6 @@
 # CutDeck 架构文档
 
-> 最后更新：2026-04-06 | v1.4.0
+> 最后更新：2026-04-06 | v1.6.0
 
 ---
 
@@ -30,6 +30,11 @@ src/
 │   │   └── formatters.ts         # 纯格式化函数
 │   ├── services/                  # 业务服务（类）
 │   │   ├── editor/               # 编辑器服务
+│   │   ├── clipRepurposing/      # 内容复用管道（v1.6.0 新增）
+│   │   │   ├── clipScorer.ts     # 多维评分引擎（6 维度）
+│   │   │   ├── seoGenerator.ts   # SEO 元数据生成
+│   │   │   ├── multiFormatExport.ts # 多格式导出（9:16/1:1/16:9）
+│   │   │   └── pipeline.ts       # 完整拆条管道
 │   │   ├── workflow/             # 工作流引擎
 │   │   │   ├── WorkflowEngine.ts  # 状态机引擎（订阅者模式）
 │   │   │   ├── steps/            # 步骤执行器
@@ -95,7 +100,7 @@ WorkflowEngine（状态机）
 React 连接 → useWorkflowEngine() hook
 ```
 
-**已注册步骤**：`upload / analyze / template-select / script-generate / script-dedup / script-edit / subtitle / ai-clip / music / timeline-edit / preview / export`
+**已注册步骤**：`upload / analyze / template-select / script-generate / script-dedup / script-edit / subtitle / ai-clip / repurposing / music / timeline-edit / preview / export`
 
 ---
 
@@ -129,6 +134,11 @@ React 连接 → useWorkflowEngine() hook
 | `IVideoProcessor` 直接实现 | v1.2.0 | 继承 `BaseVideoProcessor` |
 | `executeAIClipStep` 返回 void | <v1.3.0 | 返回 `ClipAnalysisResult | null`，结果写入 `WorkflowData.aiClipResult` |
 | `musicStep` 未注册 | <v1.3.0 | `musicExecutor` 已注册，结果写入 `WorkflowData.musicStepOutput` |
+| `WorkflowData` 缺少复用结果字段 | <v1.5.0 | 新增 `aiClipResult` / `musicStepOutput` / `repurposingResult` |
+| `preferredGenre/mood` 类型为 string | <v1.5.0 | 改为 `MusicGenre` / `MusicMood` 枚举类型 |
+| 6 个 Vitest 错误（并行 worker 隔离） | <v1.5.0 | route-preload.test.ts 添加 vi.mock 隔离 |
+| `VisionService.extractKeyframes` 方法缺失 | <v1.5.0 | 补全实现，基于场景边界采样 |
+| `clipRepurposing/` 模块不存在 | <v1.6.0 | 新增 clipScorer / seoGenerator / multiFormatExport / pipeline |
 
 ---
 

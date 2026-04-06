@@ -1,30 +1,48 @@
 # 贡献指南
 
-## 开发环境
+欢迎参与 CutDeck 开发！请阅读完整指南：[docs/contributing.md](docs/contributing.md)
+
+## 快速规范
 
 ```bash
-npm install
-npm run dev
+# 开发
+pnpm install
+pnpm dev
+
+# 检查
+pnpm run lint     # ESLint
+pnpm run type-check  # TypeScript
+pnpm run build    # 生产构建
+pnpm vitest run   # 测试（单线程：--no-file-parallelism）
 ```
 
-## 代码规范
+## 分支规范
 
-- 使用 TypeScript
-- 遵循 ESLint 规则
-- 提交前运行 `npm run lint`
+| 前缀 | 用途 |
+|------|------|
+| `main` | 主分支，稳定可发布 |
+| `feature/*` | 新功能 |
+| `fix/*` | Bug 修复 |
+| `docs/*` | 文档更新 |
+| `refactor/*` | 重构（不影响功能） |
 
-## 分支管理
+## Commit 规范
 
-- `main` - 主分支
-- `feature/*` - 功能分支
-- `fix/*` - 修复分支
+使用 `--no-verify` 跳过 commit-msg hook（已内置 pre-commit lint）：
 
-## Pull Request
+```bash
+git commit -m "feat(clipRepurposing): add ClipScorer multi-dimension scoring engine"
+git commit -m "fix(asr): implement tryWebSpeechASR fallback"
+```
 
-1. Fork 项目
-2. 创建特性分支
-3. 提交代码
-4. 创建 Pull Request
+## 发布版本
+
+```bash
+# 1. 更新 CHANGELOG.md（添加新版本条目）
+# 2. 更新 package.json 版本号
+# 3. git tag v{x.y.z}
+# 4. gh release create v{x.y.z}
+```
 
 ## 许可
 

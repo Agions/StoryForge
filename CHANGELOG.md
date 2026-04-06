@@ -1,3 +1,29 @@
+## [1.6.0] - 2026-04-06
+
+### 🎬 内容复用管道 — 长视频自动拆条
+
+- **新增 `clipRepurposing/` 模块**（4 个文件）
+  - `ClipScorer`：6 维度评分引擎（笑声密度 / 情感峰值 / 对话完整性 / 有声占比 / 语速 / 关键词命中）
+  - `SEOGenerator`：YouTube/TikTok/Instagram SEO 元数据（中英双语）
+  - `MultiFormatExport`：9:16 / 1:1 / 16:9 三格式 FFmpeg 导出
+  - `ClipRepurposingPipeline`：4 阶段完整管道
+- **Workflow 接入**：新增 `repurposing` 步骤，结果写入 `WorkflowData.repurposingResult`
+- **新增 `ai-repurposing` 工作流模式**：upload → analyze → repurposing → preview → export（约 10 分钟全自动）
+
+---
+
+## [1.5.0] - 2026-04-06
+
+### 🧹 技术债清理
+
+- **ASR 服务**：新增 `tryWebSpeechASR()` Web Speech API 实现，无 API key 也可识别；降级回退到 mock
+- **配乐服务**：预置音乐库 6 → 12 首
+- **类型安全**：消除 4 处核心 `as any`，`MusicStepInput` 改用枚举类型
+- **Bug 修复**：plotAnalysis `extractKeyframes` 调用类型、`WorkflowEngine.getData()` 公开方法
+- **测试**：route-preload.test.ts vi.mock 隔离，181 passed 0 errors（之前 6 errors）
+
+---
+
 ## [1.4.0] - 2026-04-06
 
 ### 🏗️ 核心流程架构升级
