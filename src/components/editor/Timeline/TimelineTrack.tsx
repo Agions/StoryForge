@@ -14,6 +14,7 @@ interface TimelineTrackProps {
   selectedClipId?: string
   onClipSelect: (clipId: string) => void
   onClipUpdate: (clipId: string, updates: Partial<TimelineClipType>) => void
+  onClipDoubleClick: (clipId: string) => void
   onTrackUpdate: (trackId: string, updates: Partial<TimelineTrackType>) => void
 }
 
@@ -186,6 +187,7 @@ const TimelineTrack: React.FC<TimelineTrackProps> = memo(({
             isLocked={track.locked}
             onSelect={handleClipSelect}
             onUpdate={handleClipUpdate}
+            onDoubleClick={props.onClipDoubleClick}
           />
         ))}
 

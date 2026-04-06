@@ -227,6 +227,12 @@ const Timeline: React.FC<TimelineProps> = ({
     onTrackUpdate?.(newTracks);
   }, [tracks, onTrackUpdate]);
 
+  /** 双击 clip 时打开片段编辑器 */
+  const handleClipDoubleClick = useCallback((clipId: string) => {
+    console.log('[Timeline] 双击打开片段编辑器:', clipId);
+    // TODO: 打开片段编辑器 Modal 或导航到编辑器页面
+  }, []);
+
   const handleAddTrack = useCallback((type: 'video' | 'audio' | 'subtitle') => {
     const typeCount = tracks.filter(t => t.type === type).length + 1;
     const typeNames: Record<string, string> = {
@@ -412,6 +418,7 @@ const Timeline: React.FC<TimelineProps> = ({
               selectedClipId={selectedClipId || undefined}
               onClipSelect={handleClipSelect}
               onClipUpdate={handleClipUpdate}
+              onClipDoubleClick={handleClipDoubleClick}
               onTrackUpdate={handleTrackUpdate}
             />
           ))}

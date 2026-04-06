@@ -12,6 +12,8 @@ interface TimelineClipProps {
   isLocked: boolean
   onSelect: (clipId: string, e: React.MouseEvent) => void
   onUpdate: (clipId: string, updates: Partial<TimelineClipType>) => void
+  /** 双击片段时调用，用于打开片段编辑器 */
+  onDoubleClick?: (clipId: string) => void
 }
 
 // Clip 类型对应的颜色
@@ -33,6 +35,7 @@ const TimelineClip: React.FC<TimelineClipProps> = memo(({
   isLocked,
   onSelect,
   onUpdate,
+  onDoubleClick,
 }) => {
   const [dragState, setDragState] = useState<DragState>('none')
   const [dragStartX, setDragStartX] = useState(0)
@@ -119,11 +122,11 @@ const TimelineClip: React.FC<TimelineClipProps> = memo(({
     }
   }, [dragState, dragStartX, dragStartTime, scale.pixelsPerSecond, clip, onUpdate])
 
-  // 双击编辑
+  // 双击编辑 — 打开片段编辑器
   const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    // TODO: 打开 clip 编辑器
-  }, [])
+    onDoubleClick?.(clip.id)
+  }, [clip.id, onDoubleClick])
 
   return (
     <div

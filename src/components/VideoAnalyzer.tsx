@@ -4,7 +4,8 @@ import { Card, Button, Progress, Alert, Typography, Spin } from 'antd';
 import { VideoCameraOutlined } from '@ant-design/icons';
 import { invoke } from '@tauri-apps/api/core';
 import { v4 as uuidv4 } from 'uuid';
-import type { VideoAnalysis, KeyMoment, Emotion } from '../types';
+import type { VideoAnalysis, KeyMoment } from '../types';
+import { plotAnalysisService } from '@/core/services/plotAnalysis.service';
 import VideoSelector from './VideoSelector';
 import { notify } from '@/shared';
 import styles from './VideoAnalyzer.module.less';
@@ -76,22 +77,59 @@ const VideoAnalyzer: React.FC<VideoAnalyzerProps> = ({
         logger.error('生成缩略图失败:', { error: err });
         return '';
       });
-      
-      // TODO: 实际关键时刻和情感分析应由 AI 模型完成
-      // 临时使用均匀分布生成关键帧
-      const keyMoments: KeyMoment[] = [];
-      const emotions: Emotion[] = [];
-      
-      const numKeyMoments = Math.min(8, Math.ceil(videoMetadata.duration / 30));
-      const interval = videoMetadata.duration / (numKeyMoments + 1);
-      
-      for (let i = 1; i <= numKeyMoments; i++) {
-        const timestamp = Math.round(interval * i);
-        keyMoments.push({
-          timestamp,
-          description: `关键时刻 ${i}`,
-          importance: 7 // 默认重要性
+
+      // 使用 AI 剧情分析服务获取真实关键时刻和情感分析
+      const videoInfo = {
+        id: uuidv4(),
+        path: selectedVideoUrl,
+        url: selectedVideoUrl,
+        duration: videoMetadata.duration,
+        width: videoMetadata.width,
+        height: videoMetadata.height,
+        fps: videoMetadata.fps,
+        format: '',
+        size: 0,
+        createdAt: new Date().toISOString(),
+      };
+
+      let keyMoments: KeyMoment[] = [];
+      let emotionTypes: string[] = [];
+      let aiSummary = '';
+
+      try {
+        setProgress(80);
+        const plotTimeline = await plotAnalysisService.analyzePlot(videoInfo, {
+          analyzeNarrativeArc: true,
+          analyzeEmotions: true,
         });
+
+        // 从 PlotNode 转换到 KeyMoment
+        keyMoments = plotTimeline.nodes.map((node) => ({
+          timestamp: node.startTime,
+          description: node.description || node.type,
+          importance: node.importance ?? 7,
+        }));
+
+        // 从 Emotion[] 提取类型列表
+        const emotionSet = new Set<string>();
+        for (const node of plotTimeline.nodes) {
+          if (node.emotion) emotionSet.add(node.emotion);
+        }
+        emotionTypes = Array.from(emotionSet);
+
+        aiSummary = plotTimeline.summary || '';
+      } catch (aiErr) {
+        logger.warn('[VideoAnalyzer] AI 剧情分析失败，使用 fallback 均匀采样', { error: aiErr });
+        // Fallback: 均匀分布
+        const numKeyMoments = Math.min(8, Math.ceil(videoMetadata.duration / 30));
+        const interval = videoMetadata.duration / (numKeyMoments + 1);
+        for (let i = 1; i <= numKeyMoments; i++) {
+          keyMoments.push({
+            timestamp: Math.round(interval * i),
+            description: `关键时刻 ${i}`,
+            importance: 7,
+          });
+        }
       }
       
       setProgress(90);
@@ -102,8 +140,8 @@ const VideoAnalyzer: React.FC<VideoAnalyzerProps> = ({
         title: videoMetadata.title || `项目_${projectId}`,
         duration: videoMetadata.duration,
         keyMoments,
-        emotions: emotions.map(e => e.type),
-        summary: `视频时长: ${Math.round(videoMetadata.duration)}秒，分辨率: ${videoMetadata.width}x${videoMetadata.height}，帧率: ${videoMetadata.fps}帧/秒。关键帧数量: ${keyFrames.length}。${thumbnail ? '已生成缩略图。' : ''}`
+        emotions: emotionTypes,
+        summary: aiSummary || `视频时长: ${Math.round(videoMetadata.duration)}秒，分辨率: ${videoMetadata.width}x${videoMetadata.height}，帧率: ${videoMetadata.fps}帧/秒。关键帧数量: ${keyFrames.length}。${thumbnail ? '已生成缩略图。' : ''}`
       };
       
       setProgress(100);
