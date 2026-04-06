@@ -7,7 +7,7 @@ use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::process::Command;
-use tauri::{Emitter, Manager};
+use tauri::Emitter;
 
 // ============================================
 // Types
@@ -370,7 +370,7 @@ print(json.dumps(result, ensure_ascii=False))
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let result: SubtitleResult = serde_json::from_str(&stdout)
-        .map_err(|e| format!("解析 Whisper 输出失败: {e}\n原始输出: {}", e, stdout))?;
+        .map_err(|e| format!("解析 Whisper 输出失败: {}\n原始输出: {}", e, stdout))?;
 
     let seg_count = result.segments.len();
     log::info!(
