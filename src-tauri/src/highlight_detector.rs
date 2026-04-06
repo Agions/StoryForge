@@ -511,4 +511,3 @@ impl<T: Iterator> Sorted for T {
         v.into_iter()
     }
 }
-}
